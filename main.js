@@ -44,17 +44,31 @@ function Obstacle(x, y, width, height, color, velocity) {
     this.height = height
     this.color = color
     this.velocity = velocity
+    this.update = function () {
+      if (this.x < 0) {
+        this.x = game.width 
+        this.y = Math.random() * game.height
+      }
+      this.x -= 2
+    }
     this.render = function() {
-        console.log("I am rendered noob");
+      ctx.fillStyle = this.color
+      ctx.fillRect(this.x, this.y, this.width, this.height) 
     }
 }
 
 
 
 let hero = new Crawler(50, 200, 50, 50, 'hotpink', 50)
-let ogre = new Crawler(400, 150, 60, 100, '#bada55')
-let obst = new Obstacle(200, 100, 50, 70, "red", 1)
+let ogre = new Crawler(200, 100, 60, 100, '#bada55')
+let obst = new Obstacle(Math.random() * game.height, Math.random() * game.width, 50, 70, "red", 1)
+let obstacles = []
+  for (let i = 0; i < 20; i++) {
+    obstacles.push(new Obstacle(Math.random() * game.height, Math.random() * game.width, 50, 70, "red", 1))
+  } 
 let movement = 10
+
+
 
 // We need to have a character that can move 
 // Need to have objects that cannot be touched otherwise game is over (if touch - game over)
@@ -68,27 +82,29 @@ let movement = 10
 
 let gameLoop = () => {
   // clear canvas
-  obst.render()
   ctx.clearRect(0, 0, game.width, game.height)
-  // display gamestate on the DOM
-  movementDisplay.innerText = `X: ${hero.x}\nY: ${hero.y}`
+  for (let i = 0; i < obstacles.length; i++) {
+    obstacles[i].update()
+    detectHit(obstacles[i])
+    obstacles[i].render()
+  }
   // if ogre is alive
   if (ogre.alive) {
     // render the ogre
     ogre.render()
     // detect collision
-    detectHit()
+    detectHit(ogre)
   }
   // render the hero
   hero.render()
 }
 
-let detectHit = () => {
+let detectHit = (obstacle) => {
   if (
-    hero.x + hero.width >= ogre.x &&
-    hero.x <= ogre.x + ogre.width &&
-    hero.y <= ogre.y + ogre.height &&
-    hero.y + hero.height >= ogre.y
+    hero.x + hero.width >= obstacle.x &&
+    hero.x <= obstacle.x + obstacle.width &&
+    hero.y <= obstacle.y + obstacle.height &&
+    hero.y + hero.height >= obstacle.y
     ) {
       endGame()
     }
